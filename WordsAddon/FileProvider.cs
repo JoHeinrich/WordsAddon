@@ -6,7 +6,7 @@ using System.Text;
 
 namespace VoiceControl
 {
-    public class FileProvider : BaseProvider<ICommandController>
+    public class FileProvider : BaseProvider<ICommandControllerDefinition>
     {
         private readonly IInterfaceFinder interfaceFinder;
 

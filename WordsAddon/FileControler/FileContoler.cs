@@ -10,7 +10,7 @@ using System.Windows.Forms;
 namespace VoiceControl
 {
 
-    class FileContoler : INamedCommandController,IDoesChange
+    class FileContoler : ICommandControllerDefinition,IDoesChange
     {
         private readonly IInterfaceFinder interfaceFinder;
         private readonly string path;
@@ -34,8 +34,6 @@ namespace VoiceControl
             watcher.EnableRaisingEvents = true;
         }
      
-
-        public string Name => Path.GetFileNameWithoutExtension(path);
          
         public interface ISetting
         {
@@ -43,7 +41,6 @@ namespace VoiceControl
         }
         public interface ISettingsBuilder
         {
-            IControllerSettings Settings { get; }
 
             Dictionary<string ,IOrder> Orders { get; }
 
@@ -51,20 +48,12 @@ namespace VoiceControl
         }
         public class SettingBuilder : ISettingsBuilder
         {
-            public IControllerSettings Settings { get; set; }
 
             public Dictionary<string, IOrder> Orders { get; set; }
 
             public string Value { get; set; }
         }
 
-        public class RepetitionsSetting : ISetting
-        {
-            public void Apply(ISettingsBuilder builder)
-            {
-                builder.Settings.RepetitionCount = int.Parse(builder.Value);
-            }
-        }
         public class AfterSetting : ISetting
         {
             public void Apply(ISettingsBuilder builder)
@@ -116,27 +105,14 @@ namespace VoiceControl
             public Action<string> Action { get; set; }
         }
 
-        public void Build(IBuilder builder)
+        public void Build(ICommandBuilder builder)
         {
             Categorizer categorizer = new Categorizer(new FileMappingCreator().CreateMapping(path));
-            Dictionary<string, IOrder> orders=interfaceFinder.InstantiateAllTypes<IOrder>().ToDictionary(x => x.GetType().Name);
-            Dictionary<string, ISetting> settings=interfaceFinder.InstantiateAllTypes<ISetting>().ToDictionary(x => x.GetType().Name.ToLower());
-                
-            foreach (var item in categorizer.Settings)
-            {
-                if (settings.TryGetValue(item.Key+"setting",out var setting))
-                {
-                    setting.Apply(new SettingBuilder() { Orders = orders, Settings = builder.Settings, Value = item.Value });
-                }
-                else
-                {
-                    Console.WriteLine($"Could not find setting: {item.Key}");
-                }
-                
-            }
+            KeyOrder order = new KeyOrder();
+
             foreach (var item in categorizer.Words)
             {
-                builder.Commands.AddCommand(item.Key, (i,s) =>orders[nameof(KeyOrder)].Action(IntegrateParameters( item.Value,i,s )));
+                builder.AddCommand(item.Key, (i,s) =>order.Action(IntegrateParameters( item.Value,i,s )));
             }
         }
         public string IntegrateParameters(string trigger, List<int>numbers, List<string> text)

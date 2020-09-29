@@ -46,11 +46,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FileControler\ArgumentWords.cs" />
     <Compile Include="FileControler\Categorizer.cs" />
     <Compile Include="FileControler\FileContoler.cs" />
     <Compile Include="FileControler\FileMappingCreator.cs" />
-    <Compile Include="FileControler\InputSplitter.cs" />
     <Compile Include="FileProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
