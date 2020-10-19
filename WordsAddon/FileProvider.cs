@@ -6,15 +6,15 @@ using System.Text;
 
 namespace VoiceControl
 {
-    public class FileProvider : BaseProvider<ICommandControllerDefinition>
+    public class FileProvider : BaseProvider<ICommandController>
     {
         private readonly IInterfaceFinder interfaceFinder;
 
-        public FileProvider(IPathManager pathManager, IInterfaceFinder interfaceFinder)
+        public FileProvider(IPaths pathManager, IInterfaceFinder interfaceFinder)
         {
             foreach (var file in Directory.GetFiles(pathManager.GetPath("Words")))
             {
-                available.Add(Assembly.GetAssembly(typeof(FileProvider)).GetName().Name + ".File." + Path.GetFileNameWithoutExtension(file), () => new FileContoler(interfaceFinder,file));
+                available.Add(Assembly.GetAssembly(typeof(FileProvider)).GetName().Name + ".File." + Path.GetFileNameWithoutExtension(file), () => new FileController(interfaceFinder,file));
             }
 
             this.interfaceFinder = interfaceFinder;

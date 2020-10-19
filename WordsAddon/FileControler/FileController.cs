@@ -10,14 +10,14 @@ using System.Windows.Forms;
 namespace VoiceControl
 {
 
-    class FileContoler : ICommandControllerDefinition,IDoesChange
+    class FileController : ICommandControllerDefinition,IDoesChange
     {
         private readonly IInterfaceFinder interfaceFinder;
         private readonly string path;
 
         public event Action<object> Changed;
 
-        public FileContoler(IInterfaceFinder interfaceFinder,string path)
+        public FileController(IInterfaceFinder interfaceFinder,string path)
         {
             this.interfaceFinder = interfaceFinder;
             this.path = path;
