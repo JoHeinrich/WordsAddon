@@ -9,8 +9,7 @@ namespace VoiceControl
         public Dictionary<string, string> CreateMapping(string path)
         {
             Dictionary<string, string> mapping = new Dictionary<string, string>();
-
-
+                    
             foreach (var word in File.ReadLines(path))
             {
                 try
