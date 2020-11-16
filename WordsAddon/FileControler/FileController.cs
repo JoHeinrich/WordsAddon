@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace VoiceControl
 {
@@ -16,7 +17,7 @@ namespace VoiceControl
     }
     public interface ISettingsBuilder
     {
-
+        string Active { get; set; }
         Dictionary<string, IOrder> Orders { get; }
 
         string Value { get; }
@@ -27,6 +28,22 @@ namespace VoiceControl
         public Dictionary<string, IOrder> Orders { get; set; }
 
         public string Value { get; set; }
+        public string Active { get; set; }
+    }
+
+    public class DefaultOrderSetting : ISetting
+    {
+        public void Apply(ISettingsBuilder builder)
+        {
+            foreach(var order in builder.Orders)
+            {
+                if (order.Key.ToLower().Contains(builder.Value.ToLower()))
+                {
+                    builder.Active = order.Key;
+
+                }
+            }
+        }
     }
 
     public class AfterSetting : ISetting
@@ -53,6 +70,22 @@ namespace VoiceControl
     public class KeyOrder : IOrder
     {
         public Action<string> Action { get; set; } = x => SendKeys.SendWait(x);
+    }
+
+    public class ExecuteOrder : IOrder
+    {
+        public Action<string> Action { get; set; } = x =>
+        {
+            try
+            {
+                Process.Start(x);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        };
     }
 
     internal class AfterOrder : IOrder
@@ -120,12 +153,15 @@ namespace VoiceControl
            .ToDictionary(x => x.GetType().Name);
 
             Dictionary<string, ISetting> settings = interfaceFinder.InstantiateAllTypes<ISetting>().ToDictionary(x => x.GetType().Name.ToLower());
-
+            string activeOrder = nameof(KeyOrder);
             foreach (var item in categorizer.Settings)
             {
-                if (settings.TryGetValue(item.Key + "setting", out var setting))
+                if (settings.TryGetValue(item.Key.ToLower() + "setting", out var setting))
                 {
-                    setting.Apply(new SettingBuilder() { Orders = orders, Value = item.Value });
+                    var settingBuilder = new SettingBuilder() { Orders = orders, Value = item.Value, Active = activeOrder };
+                    setting.Apply(settingBuilder);
+                    if (orders.ContainsKey(settingBuilder.Active)) 
+                        activeOrder = settingBuilder.Active;
                 }
                 else
                 {
@@ -135,7 +171,7 @@ namespace VoiceControl
             }
             foreach (var item in categorizer.Words)
             {
-                builder.AddCommand(item.Key, (i, s) => orders[nameof(KeyOrder)].Action(IntegrateParameters(item.Value, i, s)));
+                builder.AddCommand(item.Key, (i, s) => orders[activeOrder].Action(IntegrateParameters(item.Value, i, s)));
             }
 
         }
