@@ -21,14 +21,14 @@ namespace VoiceControl
                         var rest = word.Remove(0, selector.Length + 1);
                         selector = selector.Trim();
                         rest = rest.Trim();
-                        mapping.Add(selector, rest);
+                        mapping[selector]= rest;
                     }
                     else
                     {
                         var wordt = word.Trim();
                         if (wordt != "")
                         {
-                            mapping.Add(wordt, wordt);
+                            mapping[wordt]= wordt;
                         }
                     }
                 }
